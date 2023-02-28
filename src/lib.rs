@@ -6,6 +6,7 @@ pub enum Status {
     Error
 }
 
+#[no_mangle]
 pub extern "C" fn clipboard_new(cb: *mut *mut Clipboard) -> Status {
     if let Ok(clipboard) = Clipboard::new().map(Box::new) {
         unsafe { *cb = Box::leak(clipboard) as _; }
@@ -16,6 +17,7 @@ pub extern "C" fn clipboard_new(cb: *mut *mut Clipboard) -> Status {
 }
 
 // TODO: Search a way to avoid allocations.
+#[no_mangle]
 pub extern "C" fn clipboard_set_text(cb: *mut Clipboard, text: *const char, length: usize) -> Status {
     let sl = unsafe { std::slice::from_raw_parts(text, length) };
     let inp = String::from_iter(sl.iter());
@@ -23,6 +25,7 @@ pub extern "C" fn clipboard_set_text(cb: *mut Clipboard, text: *const char, leng
     return Status::Ok;
 }
 
+#[no_mangle]
 pub extern "C" fn clipboard_destroy(cb: *mut Clipboard) -> Status {
     unsafe { drop(Box::from_raw(cb)); }
     return Status::Ok;
