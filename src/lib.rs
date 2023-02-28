@@ -27,6 +27,20 @@ pub extern "C" fn clipboard_set_text(cb: *mut Clipboard, text: *const char, leng
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn clipboard_get_text(cb: *mut Clipboard) -> *mut char {
+    // TODO: Do a better design around results.
+    let mut string = (*cb).get_text().unwrap();
+    string.push('\0');
+    let leaked = Box::leak(string.into_boxed_str());
+    return leaked.as_ptr() as _;
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn destroy_string(ptr: *mut char) {
+    unsafe { drop(Box::from_raw(ptr)) };
+}
+
+#[no_mangle]
 pub extern "C" fn clipboard_destroy(cb: *mut Clipboard) -> Status {
     unsafe { drop(Box::from_raw(cb)); }
     return Status::Ok;
