@@ -19,8 +19,9 @@ pub extern "C" fn clipboard_new(cb: *mut *mut Clipboard) -> Status {
 // TODO: Search a way to avoid allocations.
 #[no_mangle]
 pub extern "C" fn clipboard_set_text(cb: *mut Clipboard, text: *const char, length: usize) -> Status {
-    let sl = unsafe { std::slice::from_raw_parts(text, length) };
-    let inp = String::from_iter(sl.iter());
+    let sl = unsafe { std::slice::from_raw_parts(text as *const u8, length) };
+    let inp = String::from_utf8_lossy(sl);
+    println!("Will set it to {inp}");
     unsafe { (*cb).set_text(inp).unwrap(); }
     return Status::Ok;
 }
